@@ -1,10 +1,8 @@
 package com.driver;
 
-import com.driver.Exceptions.valid_license_error;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.TreeMap;
 
 public class CurrentAccount extends BankAccount{
     String tradeLicenseId; //consists of Uppercase English characters only
@@ -15,7 +13,7 @@ public class CurrentAccount extends BankAccount{
         this.tradeLicenseId = tradeLicenseId;
     }
 
-    public void validateLicenseId() throws Exception {
+    public void validateLicenseId() throws Exception, valid_license_error {
         // A trade license Id is said to be valid if no two consecutive characters are same
         // If the license Id is valid, do nothing
         // If the characters of the license Id can be rearranged to create any valid license Id
@@ -69,4 +67,6 @@ public class CurrentAccount extends BankAccount{
         return sb.toString();
     }
 
+    private class valid_license_error extends Throwable {
+    }
 }

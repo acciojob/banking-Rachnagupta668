@@ -1,22 +1,19 @@
 package com.driver;
 
-import com.driver.Exceptions.Insufficient_funds;
-import com.driver.Exceptions.account_can_not_generated_exception;
-
 public class BankAccount {
 
     private String name;
     private double balance;
     private double minBalance;
 
-    public BankAccount(String name, double balance, double minBalance) {
+    public BankAccount(String name, double balance, double minBalance) throws Insufficient_funds {
         if(balance < minBalance) throw new Insufficient_funds();
         this.name = name;
         this.balance = balance;
         this.minBalance = minBalance;
     }
 
-    public String generateAccountNumber(int digits, int sum) throws Exception{
+    public String generateAccountNumber(int digits, int sum) throws Exception, account_can_not_generated_exception {
         //Each digit of an account number can lie between 0 and 9 (both inclusive)
         //Generate account number having given number of 'digits' such that the sum of digits is equal to 'sum'
         //If it is not possible, throw "Account Number can not be generated" exception
@@ -64,7 +61,7 @@ public class BankAccount {
         balance += amount;
     }
 
-    public void withdraw(double amount) throws Exception {
+    public void withdraw(double amount) throws Exception, SavingsAccount.max_withdraw_limit_exceeded, Insufficient_funds {
         if(balance - amount < minBalance) throw new Insufficient_funds();
             // Remember to throw "Insufficient Balance" exception, if the remaining amount would be less than minimum balance
         else balance -= amount;
@@ -79,4 +76,9 @@ public class BankAccount {
         return ans;
     }
 
+    private class Insufficient_funds extends Throwable {
+    }
+
+    private class account_can_not_generated_exception extends Throwable {
+    }
 }
