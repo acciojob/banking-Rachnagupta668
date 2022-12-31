@@ -1,72 +1,133 @@
 package com.driver;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.PriorityQueue;
-
+import  java.util.*;
 public class CurrentAccount extends BankAccount{
     String tradeLicenseId; //consists of Uppercase English characters only
 
     public CurrentAccount(String name, double balance, String tradeLicenseId) throws Exception {
         // minimum balance is 5000 by default. If balance is less than 5000, throw "Insufficient Balance" exception
-        super(name, balance, 5000);
+        super(name,balance,5000);
         this.tradeLicenseId = tradeLicenseId;
+        if(balance<5000){
+            throw new Exception("Insufficient Balance");
+        }
     }
 
-    public void validateLicenseId() throws Exception, valid_license_error {
+    public void validateLicenseId() throws Exception {
         // A trade license Id is said to be valid if no two consecutive characters are same
         // If the license Id is valid, do nothing
         // If the characters of the license Id can be rearranged to create any valid license Id
         // If it is not possible, throw "Valid License can not be generated" Exception
-        if(valid(tradeLicenseId)) return;
+//        boolean valid = true;
+//        for (int i = 0; i < tradeLicenseId.length() - 1; i++) {
+//            if (tradeLicenseId.charAt(i) == tradeLicenseId.charAt(i + 1)) {
+//                valid = false;
+//                break;
+//            }
+//        }
+//        if (!valid)
+//        {
+//            String str=tradeLicenseId;
+//            List<String> chars = Arrays.asList(str.split(""));
+//            Collections.shuffle(chars);
+//            boolean flag =true;
+//            for (int i = 0; i < chars.size() - 1; i++)
+//            {
+//                if (chars.get(i) == chars.get(i+1)) {
+//                    flag =false;
+//                    throw new Exception("Valid License can not be generated");
+//                }
+//            }
+//            if(flag=true)
+//            {
+//                this.tradeLicenseId = chars.toString();
+//            }
+//       }
+//        boolean valid= true;
+//        int n= tradeLicenseId.length();
+//        for(int pos=1; pos<n; pos++){
+//            char c= tradeLicenseId.charAt(pos);
+//            if(c==tradeLicenseId.charAt(pos-1)){
+//                valid= false;
+//                break;
+//            }
+//        }
+//        if(!valid) throw new Exception("Valid License can not be generated");
 
-        String  newTradeLicenseId = rearranged(tradeLicenseId);
-        if(newTradeLicenseId.length()==0) throw new valid_license_error();
-        else this.tradeLicenseId = newTradeLicenseId;
+        if (!isNumberValid(tradeLicenseId)) {
+            String rearrangedId = arrangeString(tradeLicenseId);
+            if (rearrangedId == "") {
+                throw new Exception("Valid License can not be generated");
+            } else {
+                this.tradeLicenseId = rearrangedId;
+            }
+        }
     }
 
-    public boolean valid(String s) {
-        for(int i=1; i<s.length(); i++) {
-            if(s.charAt(i)==s.charAt(i-1)) return false;
+    public char getCountChar(int[] count) {
+        int max = 0;
+        char ch = 0;
+        for (int i = 0; i < 26; i++) {
+            if (count[i] > max) {
+                max = count[i];
+                ch = (char) ((int) 'A' + i);
+            }
+        }
+        return ch;
+    }
+
+    public String arrangeString(String S) {
+        int N = S.length();
+
+        int[] count = new int[26];
+        for (int i = 0; i < 26; i++) {
+            count[i] = 0;
+        }
+        for (char ch : S.toCharArray()) {
+            count[(int) ch - (int) 'A']++;
+        }
+
+        char ch_max = getCountChar(count);
+        int maxCount = count[(int) ch_max - (int) 'A'];
+
+        if (maxCount > (N + 1) / 2)
+            return "";
+
+        String res = "";
+        for (int i = 0; i < N; i++) {
+            res += ' ';
+        }
+
+        int ind = 0;
+        while (maxCount > 0) {
+            res = res.substring(0, ind) + ch_max
+                    + res.substring(ind + 1);
+            ind = ind + 2;
+            maxCount--;
+        }
+        count[(int) ch_max - (int) 'A'] = 0;
+        for (int i = 0; i < 26; i++) {
+            while (count[i] > 0) {
+                ind = (ind >= N) ? 1 : ind;
+                res = res.substring(0, ind)
+                        + (char) ((int) 'A' + i)
+                        + res.substring(ind + 1);
+                ind += 2;
+                count[i]--;
+            }
+        }
+        return res;
+    }
+
+    public boolean isNumberValid(String licenseId) {
+        for (int i = 0; i < licenseId.length() - 1; i++) {
+            if (licenseId.charAt(i) == licenseId.charAt(i + 1)) {
+                return false;
+            }
         }
         return true;
     }
 
-    public String rearranged(String s) {
-        int len = s.length();
-        Map<Character, Integer> map = new HashMap<>();
-        for(char ch : s.toCharArray()) {
-            map.put(ch,map.getOrDefault(ch,0)+1);
-            if(map.get(ch) > (len+1)/2) return "";
-        }
-
-        PriorityQueue<Character> pq = new PriorityQueue<>((a,b)->map.get(b)-map.get(a));
-        for(char ch : map.keySet()) pq.offer(ch);
-
-        StringBuilder sb = new StringBuilder();
-        while(!pq.isEmpty()) {
-            char ch = pq.poll();
-            if(sb.length()==0 || sb.charAt(sb.length()-1)!=ch) {
-                sb.append(ch);
-                int f1 = map.get(ch);
-                if(--f1 > 0) {
-                    map.put(ch,f1);
-                    pq.offer(ch);
-                }
-            } else {
-                char ch2 = pq.poll();
-                int f2 = map.get(ch2);
-                sb.append(ch2);
-                if(--f2 > 0) {
-                    map.put(ch2, f2);
-                    pq.offer(ch2);
-                }
-                pq.offer(ch);
-            }
-        }
-        return sb.toString();
-    }
-
-    private class valid_license_error extends Throwable {
+    public String getTradeLicenseId() {
+        return tradeLicenseId;
     }
 }
